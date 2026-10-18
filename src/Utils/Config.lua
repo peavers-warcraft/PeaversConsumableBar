@@ -21,6 +21,15 @@ local Categories = PCBar.Categories
 PCBar.name = PCBar.name or addonName
 
 local PCBAR_DEFAULTS = {
+    -- The master switch, and deliberately not a fourth entry in `visibility`
+    -- below. They answer two different questions: this one is "do I want this
+    -- addon's bar at all", decided once, and the other is "when should the bar
+    -- I do want be on screen", which the secure environment re-answers every
+    -- pull. Collapsing them would mean a player who hides the bar for a night
+    -- loses the combat rule they had chosen, and would leave a pack installer
+    -- with no single setting to put a checkbox against.
+    enabled = true,
+
     -- Buttons
     buttonSize = 36,
     buttonSpacing = 2,

@@ -257,6 +257,16 @@ function Bar:ApplyVisibility()
     local config = PCBar.Config
     if not self.frame then return end
 
+    -- Switched off beats every other rule below, Edit Mode included. A player
+    -- who has said they do not want this bar should not have it reappear
+    -- because they opened Edit Mode to move something else - the checkbox in
+    -- the dialog is how they get it back, not the bar turning up uninvited.
+    if config.enabled == false then
+        UnregisterStateDriver(self.frame, "visibility")
+        self.frame:Hide()
+        return
+    end
+
     -- While it is being positioned the bar stays on screen whatever the rule
     -- says, and whether or not there is anything in the bags to put on it.
     if self:IsPositioning() then
