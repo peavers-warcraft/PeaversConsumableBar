@@ -39,7 +39,21 @@ local RESCAN_DELAY = 0.2
 -- Rescanning
 --------------------------------------------------------------------------------
 
+--- Whether there is any point doing work right now.
+---
+--- Switched off has to be checked here rather than only at the drawing end. The
+--- bags change constantly - every loot, every vendor trip, every cooldown tick -
+--- and an addon the player has turned off scanning all of it to decide not to
+--- draw anything is exactly the idle cost this file is written to avoid. The
+--- bar is hidden by Bar:ApplyVisibility either way; this is about not paying for
+--- it. Switching back on goes through Core:ApplyConfig, which schedules the scan
+--- that was skipped.
+local function Enabled()
+    return PCBar.Config.enabled ~= false
+end
+
 function Core:ScheduleRescan()
+    if not Enabled() then return end
     if self.rescanQueued then return end
     self.rescanQueued = true
 
@@ -120,6 +134,7 @@ function Core:BindEvents()
     -- Counts and the shared potion lockout, which do not change which buttons
     -- exist. Safe in combat, and the only thing that runs during a fight.
     Events:RegisterEvent("BAG_UPDATE_COOLDOWN", function()
+        if not Enabled() then return end
         Bar:Refresh()
     end)
 

@@ -123,6 +123,38 @@ do
 end
 
 --------------------------------------------------------------------------------
+-- The master switch
+--
+-- `enabled` and `visibility` are two settings on purpose, and the thing that
+-- would quietly break is them collapsing into one: switching the bar off for a
+-- night must not cost the player the combat rule they chose, because there is
+-- nothing to tell them it went.
+--------------------------------------------------------------------------------
+
+do
+    local config = freshConfig()
+
+    harness.check("the bar is on by default", config.enabled == true)
+
+    config.enabled = false
+    config.visibility = "always"
+    harness.check("switching it off leaves the visibility rule alone",
+        config.visibility == "always")
+
+    config.enabled = true
+    harness.check("and switching it back on returns that same rule",
+        config.visibility == "always")
+end
+
+do
+    local config = freshConfig({ enabled = false })
+    harness.check("a saved off state survives a reload", config.enabled == false)
+
+    config:Reset()
+    harness.check("and reset puts the bar back on", config.enabled == true)
+end
+
+--------------------------------------------------------------------------------
 -- Reset
 --------------------------------------------------------------------------------
 

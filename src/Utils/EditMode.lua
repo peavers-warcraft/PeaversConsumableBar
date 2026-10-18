@@ -124,6 +124,13 @@ EditMode.ENTRIES = {
 
     ------------------------------------------------------------- behaviour ---
     {
+        key = "enabled", label = "Enable The Bar", kind = "checkbox",
+        section = "behaviour", default = true,
+        desc = "Off takes the bar off screen entirely and leaves the rest of "
+            .. "these settings where they are, so switching it back on returns "
+            .. "the bar you had rather than a default one.",
+    },
+    {
         key = "visibility", label = "Show The Bar", kind = "dropdown",
         section = "behaviour", surface = "config",
         fallback = "outOfCombat", values = Bar.VISIBILITY_MODES,
