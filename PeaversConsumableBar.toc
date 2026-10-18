@@ -7,6 +7,7 @@
 ## Category-enUS: Peavers
 ## X-Website: https://peavers.io
 ## X-Source-Code: https://github.com/peavers-warcraft/PeaversConsumableBar
+## X-Curse-Project-ID: 1752451
 ## Dependencies: PeaversCommons, PeaversConfig
 ## SavedVariables: PeaversConsumableBarDB
 

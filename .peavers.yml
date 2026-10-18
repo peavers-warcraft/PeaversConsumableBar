@@ -3,6 +3,9 @@
 # Icon to display on website
 iconType: SystemIcon
 
+# CurseForge project ID for download statistics
+curseForgeProjectId: 1752451
+
 # Tags for filtering and categorization
 tags:
   - interface
