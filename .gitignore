@@ -1,0 +1,9 @@
+.idea
+*.iml
+.DS_Store
+
+# Screen recordings dropped in the addon root must never reach a release.
+*.mp4
+
+# Claude Code worktrees are scratch space, never repository content.
+.claude/

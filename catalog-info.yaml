@@ -1,0 +1,11 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: PeaversConsumableBar
+  description: "A World of Warcraft addon that puts the consumables already in the player's bags onto a configurable action bar. Classifies items by the client's own item class and subclass rather than by name or an item-ID list, rebuilds only on bag events with no OnUpdate anywhere, and hides itself in combat through a secure state driver."
+  annotations:
+    github.com/project-slug: peavers-warcraft/PeaversConsumableBar
+spec:
+  type: library
+  lifecycle: production
+  owner: peavers-warcraft

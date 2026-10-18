@@ -1,0 +1,28 @@
+## Interface: 120001, 120005, 120007, 120100
+## Title: |cff3abdf7Peavers|rConsumableBar
+## Notes: Puts the consumables already in your bags on a bar, so flasks, food and oils are one click away before a pull
+## Author: Peavers
+## Version: 1.0.0
+## IconTexture: Interface\AddOns\PeaversCommons\src\Media\Icon.tga
+## Category-enUS: Peavers
+## X-Website: https://peavers.io
+## X-Source-Code: https://github.com/peavers-warcraft/PeaversConsumableBar
+## Dependencies: PeaversCommons, PeaversConfig
+## SavedVariables: PeaversConsumableBarDB
+
+Changelog.lua
+
+src\Core\Categories.lua
+src\Core\Conjured.lua
+src\Core\Scanner.lua
+
+src\UI\Button.lua
+src\UI\Bar.lua
+
+src\Utils\Config.lua
+src\Utils\EditMode.lua
+src\Utils\ConfigUI.lua
+src\Utils\Patrons.lua
+
+src\Core\Core.lua
+src\Main.lua

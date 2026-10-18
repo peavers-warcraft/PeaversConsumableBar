@@ -1,0 +1,11 @@
+# .peavers.yml - Addon metadata for peavers.io website
+
+# Icon to display on website
+iconType: SystemIcon
+
+# Tags for filtering and categorization
+tags:
+  - interface
+  - inventory
+  - combat
+  - lightweight
