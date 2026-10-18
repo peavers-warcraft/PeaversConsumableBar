@@ -20,10 +20,4 @@ jobs:
       git_user_name: Chris Turner
       git_user_email: peavers@gmail.com
       use_self_hosted: true
-      # No CurseForge project exists for this addon yet, and uploading without
-      # one fails with errorCode 1006 (project not provisioned). The GitHub
-      # release and the catalog poke are what the Peavers Updater consumes, so
-      # releases work without this leg. Set X-Curse-Project-ID in the .toc and
-      # curseForgeProjectId in .peavers.yml, then drop this line.
-      publish_curseforge: false
     secrets: inherit
