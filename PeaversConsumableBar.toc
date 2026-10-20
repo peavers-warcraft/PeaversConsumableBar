@@ -1,4 +1,4 @@
-## Interface: 120001, 120005, 120007, 120100
+## Interface: 120001, 120005, 120007, 120100, 120105
 ## Title: |cff3abdf7Peavers|rConsumableBar
 ## Notes: Puts the consumables already in your bags on a bar, so flasks, food and oils are one click away before a pull
 ## Author: Peavers
