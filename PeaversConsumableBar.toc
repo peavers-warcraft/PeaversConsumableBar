@@ -2,7 +2,7 @@
 ## Title: |cff3abdf7Peavers|rConsumableBar
 ## Notes: Puts the consumables already in your bags on a bar, so flasks, food and oils are one click away before a pull
 ## Author: Peavers
-## Version: 1.0.4
+## Version: 1.0.5
 ## IconTexture: Interface\AddOns\PeaversCommons\src\Media\Icon.tga
 ## Category-enUS: Peavers
 ## X-Website: https://peavers.io
