@@ -224,7 +224,8 @@ end
 function harness.loadConfig(PCBar, saved)
     install()
 
-    _G.PeaversCommons = {
+    -- Only the ConfigManager slice Config.lua reaches for, not the whole library.
+    local commons = {
         ConfigManager = {
             New = function(_, _, defaults)
                 local config = {}
@@ -254,6 +255,7 @@ function harness.loadConfig(PCBar, saved)
             end,
         },
     }
+    _G.PeaversCommons = commons
 
     local path = root() .. "/src/Utils/Config.lua"
     local chunk = assert(loadfile(path), "cannot load " .. path)
