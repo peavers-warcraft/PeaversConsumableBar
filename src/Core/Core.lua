@@ -114,7 +114,7 @@ function Core:SetUnlocked(unlocked)
     return true
 end
 
---- @return boolean|nil unlocked, or nil if combat refused the change
+--- @return boolean? unlocked the new state, or nil if combat refused the change
 function Core:ToggleUnlocked()
     if InCombatLockdown() then return nil end
     return Bar:ToggleUnlocked()
