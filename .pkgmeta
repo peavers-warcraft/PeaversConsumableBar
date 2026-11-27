@@ -8,6 +8,7 @@ ignore:
   - .git
   - .github
   - tests
+  - scripts
   - .gitignore
   - .editorconfig
   - .pkgmeta

@@ -48,21 +48,29 @@ harness.items = {}
 harness.bags = {}
 harness.loadRequests = {}
 
-harness.CLASS = { consumable = 0, enhancement = 8, armor = 4 }
+-- How many times the full item info was asked for. Retail's scan never asks, and
+-- a test says so, because "the order on retail is unchanged" should mean the
+-- calls are unchanged too.
+harness.itemInfoCalls = 0
+
+harness.CLASS = { consumable = 0, tradegoods = 7, enhancement = 8, armor = 4 }
 harness.SUB = {
     generic = 0, potion = 1, elixir = 2, flask = 3, scroll = 4,
     food = 5, enhancement = 6, bandage = 7, other = 8,
+    -- WoW Forever's own.
+    draught = 13, device = 14, temporary = 15,
 }
 
 ---Define an item. `cached` defaults to true and `spell` to a use effect, because
 ---the ordinary case is an item whose info has arrived and which does something.
 ---@param itemID number
----@param spec table { classID, subclassID, quality, name, spell, cached, conjured }
+---@param spec table { classID, subclassID, quality, level, name, spell, cached, conjured }
 function harness.defineItem(itemID, spec)
     harness.items[itemID] = {
         classID = spec.classID,
         subclassID = spec.subclassID,
         quality = spec.quality or 1,
+        level = spec.level or 1,
         name = spec.name or ("Item " .. itemID),
         icon = spec.icon or 1,
         spell = spec.spell ~= false and (spec.spell or ("Use " .. itemID)) or nil,
@@ -82,6 +90,7 @@ function harness.reset()
     harness.items = {}
     harness.bags = {}
     harness.loadRequests = {}
+    harness.itemInfoCalls = 0
 end
 
 --------------------------------------------------------------------------------
@@ -143,6 +152,16 @@ local function install()
             return itemID, nil, nil, nil, item.icon, item.classID, item.subclassID
         end,
 
+        -- Only as far as the item level, the one return anything here reads.
+        -- Nothing until the item's data has arrived, as in the client.
+        GetItemInfo = function(itemID)
+            harness.itemInfoCalls = harness.itemInfoCalls + 1
+            local item = harness.items[itemID]
+            if not item or not item.cached then return nil end
+            -- itemName, itemLink, itemQuality, itemLevel
+            return item.name, nil, item.quality, item.level
+        end,
+
         GetItemQualityByID = function(itemID)
             local item = harness.items[itemID]
             return item and item.quality
@@ -188,14 +207,29 @@ local function install()
     }
 end
 
+---The slice of PeaversCommons that Categories asks which game this is.
+---@param client string "retail" or "forever"
+function harness.installCommons(client)
+    -- Through a local, as loadConfig does: a bare table literal assigned to the
+    -- global is checked against the whole of the library's type.
+    local commons = {
+        Require = function() return true end,
+        Client = { isForever = client == "forever" },
+    }
+    _G.PeaversCommons = commons
+end
+
 ---Load Categories and Scanner into a shared addon table and return it.
+---@param client string|nil "retail" (the default) or "forever"
 ---@return table PCBar
-function harness.load()
+function harness.load(client)
     install()
+    harness.installCommons(client or "retail")
 
     local PCBar = {}
 
     local files = {
+        "src/Data/ForeverEnhancements.lua",
         "src/Core/Categories.lua",
         "src/Core/Conjured.lua",
         "src/Core/Scanner.lua",
