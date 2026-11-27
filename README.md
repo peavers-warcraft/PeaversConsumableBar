@@ -4,13 +4,15 @@
 
 Puts the consumables already in your bags onto a bar, so applying a flask, a weapon oil and your food before a pull is three clicks in one place instead of three trips through your bags.
 
+Works on retail and on WoW Forever.
+
 **No bundled libraries. No `OnUpdate` anywhere. The bar is rebuilt when your bags change and at no other time.**
 
 ## What lands on the bar
 
 Anything in your bags that the game itself files under a category you have turned on, and that has something to do when you click it.
 
-Nothing is matched by name and nothing comes from a list of item IDs. The category comes from the item's own class and subclass in the client's item database, which means a flask added in a patch appears without this addon being updated — and it means the categories read correctly in every locale, which a name match never could.
+Nothing is matched by name, and on retail nothing comes from a list of item IDs. The category comes from the item's own class and subclass in the client's item database, which means a flask added in a patch appears without this addon being updated — and it means the categories read correctly in every locale, which a name match never could. WoW Forever needs one exception, [described below](#on-wow-forever).
 
 | Category | On by default |
 |---|:--:|
@@ -18,7 +20,7 @@ Nothing is matched by name and nothing comes from a list of item IDs. The catego
 | Potions | yes |
 | Food & Drink | yes |
 | Oils, Stones & Kits | yes |
-| Elixirs | no |
+| Elixirs | on WoW Forever |
 | Bandages | no |
 | Scrolls | no |
 | Other Consumables | no |
@@ -28,6 +30,16 @@ The four on by default are the pre-combat routine the bar exists for. The rest a
 Three filters run on top of the categories. Items with no on-use effect are dropped — reagents, quest turn-ins, the fish you have not cooked yet — because a button that does nothing when clicked is worse than no button. A quality floor, at Common by default, drops the vendor trash that happens to have a use effect attached. And **Hide Conjured Items** clears out mage food and water in one go; it is off by default because conjured food is the food a mage actually eats, and because Healthstones are conjured too.
 
 Conjured-ness is not a field the client exposes. The only place it is stated is the item's tooltip, as a line reading `ITEM_CONJURED`, so that is what gets read — once per item, through `C_TooltipInfo`, and cached for the session. The filter fails open: an item whose tooltip has not arrived is shown, because an unfiltered bar is a far smaller problem than a flask that silently never appears.
+
+## On WoW Forever
+
+Forever runs retail's client with vanilla's consumables, and files a few of them in ways retail players never meet. Three things are different there:
+
+- **Weapon oils, sharpening stones, weightstones and rogue poisons go in Oils, Stones & Kits.** Forever files most of them under *Other*, beside quest writs, crates and fireworks; a couple of oils under Trade Goods; and its imbue scrolls under Scrolls. The bar puts all of them, and shield coatings, where you would look for them: anything you put on a weapon for a while. Fishing lures stay in Other.
+- **Elixirs are on to begin with.** On retail an elixir is what you drink when you have no flask. On Forever a flask is a raid luxury and elixirs are the routine itself.
+- **Each category puts its highest-level item first.** Forever re-issued some vanilla consumables under new item numbers, so the highest number no longer means the newest tier.
+
+The client gives an addon no way to tell a wizard oil from a quest writ: same class, same subclass, and the tooltip says it goes on a weapon only in prose. The game's spell data does say so, so `scripts/forever_enhancements.py` reads it ahead of time and writes the list the bar ships with. It is generated, not kept by hand, and nothing matches by name. An item a Forever patch adds before the list is next regenerated is filed by its subclass, exactly as it would be without the list.
 
 ## One item at a time
 
@@ -61,6 +73,7 @@ Anything that changes which buttons exist — looting a flask mid-fight, running
 <!-- peavers:features -->
 - Scans your bags and builds a bar from what it finds, with no list to maintain
 - Eight categories, each switchable, classified from the game's own item data rather than by name
+- Works on WoW Forever, with its oils, stones and rogue poisons where you would look for them
 - Per-item switches that overrule the category both ways — show one item from a category you keep off, or hide one from a category you keep on
 - **Hide Conjured Items** for mage food and water
 - Rows or columns, with a configurable button size, spacing and wrap point

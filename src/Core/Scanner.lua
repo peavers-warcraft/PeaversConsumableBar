@@ -34,6 +34,9 @@ PCBar.Scanner = Scanner
 -- arrived, so there is nothing yet to judge it on.
 local PENDING = {}
 
+-- Forever only: see Order below.
+local ORDER_BY_LEVEL = Categories.isForever
+
 -- Enum.BagIndex.Backpack. The negative bag indices are the bank and the keyring,
 -- neither of which is reachable from where you stand when you drink a flask.
 local FIRST_BAG = 0
@@ -45,6 +48,14 @@ local function LastBag()
         last = reagent
     end
     return last
+end
+
+--- The base item level, where the order uses it, and 0 everywhere else - which
+--- leaves retail's order exactly as it was.
+local function ItemLevel(itemID)
+    if not ORDER_BY_LEVEL then return 0 end
+    local _, _, _, level = C_Item.GetItemInfo(itemID)
+    return level or 0
 end
 
 --------------------------------------------------------------------------------
@@ -95,6 +106,7 @@ local function Consider(itemID, bag, slot, info, config)
         slot = slot,
         category = category,
         quality = quality,
+        level = ItemLevel(itemID),
         name = C_Item.GetItemNameByID(itemID) or spellName or tostring(itemID),
         icon = info.iconFileID or C_Item.GetItemIconByID(itemID),
         count = C_Item.GetItemCount(itemID) or info.stackCount or 1,
@@ -109,6 +121,16 @@ end
 -- quality is - and unlike item level it needs nothing from the server, so the
 -- order does not shuffle about as the cache fills in. Name is the tie-break, to
 -- keep the order stable rather than merely consistent.
+--
+-- On WoW Forever the IDs stopped meaning that. Forever re-issued about two dozen
+-- vanilla consumables under new IDs - a Minor Healing Potion can be 287966 there
+-- while Major Healing Potion is still 13446 - so newest-ID-first would put the
+-- weakest potion in front and let the cap trim the best. Its consumables' item
+-- levels are a clean ladder instead (Rough Sharpening Stone 5, Dense 45,
+-- Elemental 60), so Forever orders by item level before ID. The bar only takes
+-- an item once its data has arrived, so the level is there by the time it is
+-- compared; the settings list can see an item sooner, and sorts it as level 0
+-- until then.
 --------------------------------------------------------------------------------
 
 local COMPARATORS = {
@@ -117,6 +139,7 @@ local COMPARATORS = {
         local orderB = Categories.ORDER[b.category] or math.huge
         if orderA ~= orderB then return orderA < orderB end
         if a.quality ~= b.quality then return a.quality > b.quality end
+        if a.level ~= b.level then return a.level > b.level end
         if a.itemID ~= b.itemID then return a.itemID > b.itemID end
         return a.name < b.name
     end,
@@ -133,7 +156,8 @@ local COMPARATORS = {
 }
 
 Scanner.SORT_MODES = {
-    { value = "category", label = "By category, newest first" },
+    { value = "category", label = ORDER_BY_LEVEL and "By category, highest level first"
+        or "By category, newest first" },
     { value = "name",     label = "By name" },
     { value = "bags",     label = "Bag order" },
 }
@@ -206,6 +230,7 @@ function Scanner:ScanAll()
                         slot = slot,
                         category = category,
                         quality = info.quality or C_Item.GetItemQualityByID(itemID) or 1,
+                        level = ItemLevel(itemID),
                         name = C_Item.GetItemNameByID(itemID) or tostring(itemID),
                         icon = info.iconFileID or C_Item.GetItemIconByID(itemID),
                         count = C_Item.GetItemCount(itemID) or info.stackCount or 1,

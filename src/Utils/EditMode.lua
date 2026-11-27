@@ -150,8 +150,11 @@ EditMode.ENTRIES = {
     {
         key = "maxButtons", label = "Most Buttons", kind = "slider",
         section = "behaviour", min = 4, max = 60, step = 1, default = 24,
-        desc = "A ceiling, not a target. With the default order the newest of "
-            .. "each kind comes first, so a cap trims the oldest.",
+        desc = Categories.isForever
+            and ("A ceiling, not a target. With the default order the highest "
+                .. "level of each kind comes first, so a cap trims the lowest.")
+            or ("A ceiling, not a target. With the default order the newest of "
+                .. "each kind comes first, so a cap trims the oldest."),
     },
     {
         key = "minQuality", label = "Lowest Quality", kind = "dropdown",

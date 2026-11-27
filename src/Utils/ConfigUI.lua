@@ -31,6 +31,8 @@ local ConfigUIUtils = PeaversCommons.ConfigUIUtils
 local Categories = PCBar.Categories
 local Scanner = PCBar.Scanner
 
+local isForever = Categories.isForever
+
 local INDENT = 25
 local ROW_HEIGHT = 26
 local ICON_SIZE = 18
@@ -43,8 +45,22 @@ local NOTE_WIDTH = 120
 -- Information
 --------------------------------------------------------------------------------
 
+--- Forever's own section, after "What lands on the bar". Appended rather than
+--- written into the list as `isForever and ... or nil`: the page is walked with
+--- ipairs, which stops at the first nil and would drop every section after it.
+local FOREVER_BLOCKS = {
+    { header = "On WoW Forever" },
+    "Forever files most weapon oils, sharpening stones, weightstones and rogue "
+        .. "poisons under Other, beside quest writs and crates. The bar puts them "
+        .. "in Oils, Stones & Kits instead, with imbue scrolls and shield "
+        .. "coatings: anything you put on a weapon for a while. Which items those "
+        .. "are is read from the game's own spell data. Each category puts its "
+        .. "highest-level item first, because Forever's item numbers no longer "
+        .. "say which one is newest.",
+}
+
 function ConfigUI:BuildInfoPage(parentFrame)
-    ConfigUIUtils.BuildInfoPageWithEditMode(parentFrame, "Consumable Bar", {
+    local blocks = {
         "Puts the consumables already in your bags onto a bar, so applying a "
             .. "flask, a weapon oil and your food before a pull is three clicks "
             .. "in one place instead of three trips through your bags.",
@@ -56,6 +72,14 @@ function ConfigUI:BuildInfoPage(parentFrame)
         { command = "/pcbar reset", desc = "restore every setting to its default" },
 
         { header = "What lands on the bar" },
+        isForever and (
+        "Anything in your bags that the game itself files under a category you "
+            .. "have turned on, and that has something to do when you click it. "
+            .. "Nothing is matched by name. Flasks, elixirs, potions, food and "
+            .. "weapon oils are on to begin with; bandages, scrolls and the long "
+            .. "tail are off, because a full set of bags holds far more "
+            .. "consumables than anyone wants on screen.")
+        or (
         "Anything in your bags that the game itself files under a category you "
             .. "have turned on, and that has something to do when you click it. "
             .. "Nothing is matched by name and nothing comes from a list of item "
@@ -63,12 +87,20 @@ function ConfigUI:BuildInfoPage(parentFrame)
             .. "updated. Flasks, potions, food and weapon oils are on to begin "
             .. "with; elixirs, bandages, scrolls and the long tail are off, "
             .. "because a full set of bags holds far more consumables than anyone "
-            .. "wants on screen.",
+            .. "wants on screen."),
+    }
+
+    if isForever then
+        for _, block in ipairs(FOREVER_BLOCKS) do blocks[#blocks + 1] = block end
+    end
+
+    for _, block in ipairs({
         { header = "One item at a time" },
         "The Items tab above lists every consumable in your bags with a tick "
             .. "each, and the tick overrules the category both ways. Tick an item "
             .. "whose category is off and it goes on the bar anyway - which is "
-            .. "how you get one weapon oil without turning on the whole of Other "
+            .. "how you get " .. (isForever and "your Healthstone" or "one weapon oil")
+            .. " without turning on the whole of Other "
             .. "Consumables. Untick one whose category is on and it stays off, "
             .. "for the flask you are saving rather than drinking.",
         "An override also skips the quality floor and the conjured filter, "
@@ -106,7 +138,11 @@ function ConfigUI:BuildInfoPage(parentFrame)
             .. "- looting a stack, sorting, vendoring a bagful - is coalesced "
             .. "into a single scan. Cooldown sweeps are drawn by the client's own "
             .. "Cooldown widget. Idle cost is nil.",
-    }, {
+    }) do
+        blocks[#blocks + 1] = block
+    end
+
+    ConfigUIUtils.BuildInfoPageWithEditMode(parentFrame, "Consumable Bar", blocks, {
         title = "the consumable bar",
         select = "the consumable bar",
         reset = function()
