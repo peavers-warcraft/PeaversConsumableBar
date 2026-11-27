@@ -1,0 +1,77 @@
+name: Forever data
+
+# Every Tuesday, after the patch: rebuild src/Data/ForeverEnhancements.lua from
+# the newest WoW Forever build on wago.tools (scripts/forever_enhancements.py).
+#
+# Only a change to the list of items counts. The file's header names the build it
+# came from, and a new build with the same items is not worth a release, so that
+# line is ignored when deciding. A real change is tested against the full suite,
+# committed to master and released. No change means nothing happens.
+
+on:
+  schedule:
+    # Tuesday 21:41 UTC. Forever's Tuesday build reaches wago.tools at about
+    # 15:20 UTC; the hours between cover a slow publish.
+    - cron: '41 21 * * 2'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Regenerate and test, but do not commit or release'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: forever-data
+  cancel-in-progress: false
+
+jobs:
+  regenerate:
+    runs-on: ${{ vars.RUNNER_LABEL || 'blacksmith-4vcpu-ubuntu-2404' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Rebuild the list from the newest Forever build
+        run: python3 scripts/forever_enhancements.py
+
+      - name: Did the items change?
+        id: diff
+        run: |
+          # -I drops hunks whose every line matches: the header's build stamp.
+          if git diff --quiet -I '^-- WoW Forever ' -- src/Data/ForeverEnhancements.lua; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Same items as the committed list; nothing to do."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            git diff -- src/Data/ForeverEnhancements.lua
+          fi
+
+      - name: Install Lua 5.1
+        if: steps.diff.outputs.changed == 'true'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lua5.1
+
+      # The Forever tests read the committed file and check for the stones, oils
+      # and poisons everyone carries, so a selection the script got wrong stops
+      # here instead of reaching players.
+      - name: Test against the new list
+        if: steps.diff.outputs.changed == 'true'
+        run: bash tests/run.sh
+
+      - name: Commit and release
+        if: steps.diff.outputs.changed == 'true' && !inputs.dry_run && github.ref == 'refs/heads/master'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          build=$(sed -n 's/^-- WoW Forever \([0-9.]*\):.*/\1/p' src/Data/ForeverEnhancements.lua)
+          git config user.name "Chris Turner"
+          git config user.email "peavers@gmail.com"
+          git add src/Data/ForeverEnhancements.lua
+          # A fix: subject, so the in-game changelog says what changed for players.
+          git commit -m "fix: Updates Oils, Stones & Kits for WoW Forever ${build}"
+          git push origin HEAD:master
+          # A push made with GITHUB_TOKEN starts no workflows, so Release would
+          # never see it. workflow_dispatch is the one event that token may start.
+          gh workflow run release.yml --ref master
